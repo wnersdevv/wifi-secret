@@ -1,0 +1,23 @@
+{
+  "app": {
+    "name": "WiFi Secret",
+    "brand": "wnersdev",
+    "locale": "tr"
+  },
+  "hotspot": {
+    "defaultSsid": "WiFiSecret-AP",
+    "autoStart": false,
+    "autoStopMinutes": 0,
+    "deviceRefreshSeconds": 10
+  },
+  "scanner": {
+    "refreshSeconds": 15
+  },
+  "backup": {
+    "directory": "data/backups"
+  },
+  "geo": {
+    "provider": "ip-api",
+    "endpoint": "http://ip-api.com/json/"
+  }
+}

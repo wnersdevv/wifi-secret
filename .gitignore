@@ -1,0 +1,7 @@
+node_modules/
+logs/*.log
+data/credentials.dat
+data/runtime.json
+data/backups/
+*.wsb
+npm-debug.log*

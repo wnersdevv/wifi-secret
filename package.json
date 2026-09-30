@@ -1,0 +1,27 @@
+{
+  "name": "wifi-secret",
+  "version": "1.0.0",
+  "description": "WiFi Secret - Windows Wi-Fi management, analysis, hotspot, backup and Discord control system",
+  "main": "wnersdev.js",
+  "scripts": {
+    "start": "node wnersdev.js",
+    "bot": "node wnersdev.js --bot",
+    "ui": "node wnersdev.js --ui",
+    "register": "node scripts/register-commands.js",
+    "set-credential": "node scripts/set-credential.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": [
+    "win32"
+  ],
+  "dependencies": {
+    "croxydb": "^1.4.0",
+    "discord.js": "^14.16.3",
+    "mongoose": "^8.8.0",
+    "qrcode": "^1.5.4"
+  },
+  "author": "wnersdev",
+  "license": "MIT"
+}

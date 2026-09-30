@@ -1,0 +1,74 @@
+WiFi Secret — Kurulum ve Kullanım
+#powerbywnersdev
+
+GEREKSINIMLER
+  - Windows 10/11
+  - Node.js 18 veya üzeri
+  - (Opsiyonel) MongoDB — kalıcı loglar, izinler, cihaz kaydı için
+  - (Opsiyonel) Discord bot — uzaktan kontrol için
+
+1) BAĞIMLILIKLARI KUR
+   npm install
+
+2) GİZLİ BİLGİLERİ GÜVENLİ KAYDET (.env YOK — Windows DPAPI ile şifrelenir)
+   Bilgiler data/credentials.dat içinde, sadece bu Windows kullanıcısının
+   çözebileceği şekilde şifreli saklanır. Kaynak koda hiçbir secret yazılmaz.
+
+   npm run set-credential discord_token
+   npm run set-credential discord_client_id
+   npm run set-credential mongo_uri
+
+   Kayıtlıları görmek için:   node scripts/set-credential.js list
+   Silmek için:               node scripts/set-credential.js delete discord_token
+
+3) AYARLAR
+   config/config.json     — uygulama, hotspot, tarayıcı, geo ayarları
+   config/database.json    — MongoDB / CroxyDB ayarları
+   config/discord.json     — prefix, owner/admin ID listeleri, kritik komut onayı
+
+   Discord owner/admin ID'lerini config/discord.json içindeki
+   "owners" ve "admins" dizilerine ekleyin.
+
+4) DISCORD SLASH KOMUTLARINI KAYDET
+   npm run register
+   (guildId doluysa anında, boşsa global — 1 saate kadar sürebilir)
+
+5) ÇALIŞTIR
+   npm start          — dashboard (http://127.0.0.1:4790) + Discord bot
+   npm run ui         — sadece dashboard
+   npm run bot        — sadece Discord bot
+
+   Hızlı komut satırı:
+   node wnersdev.js cli status
+   node wnersdev.js cli scan
+   node wnersdev.js cli hotspot start
+   node wnersdev.js cli security
+   node wnersdev.js cli ip 8.8.8.8
+
+DISCORD KOMUTLARI
+   Slash:  /wifi status | networks | scan | security | devices | logs
+           /wifi qr | password | ip | backup | restore
+           /wifi hotspot info | start | stop | restart
+   Prefix: !wifi status | networks | hotspot start | hotspot stop ...
+
+   Yetki: owner > admin > user. Kritik komutlar (hotspot start/stop/restart,
+   restore) onay butonu ister. Her komutta cooldown ve audit log vardır.
+
+GÜVENLIK NOTLARI
+   - Dashboard yalnızca 127.0.0.1 (loopback) dinler, ağa açılmaz.
+   - Wi-Fi profil yedekleri AES-256-GCM ile, sizin belirlediğiniz parolayla
+     şifrelenir (data/backups/*.wsb).
+   - Loglarda parola/anahtar gösterilmez.
+   - Fake WiFi / Lab modu yalnızca kendi makinenizde izole bir test
+     hotspot'udur; başka ağı taklit etmez, parola toplamaz.
+
+DOSYA YAPISI
+   wnersdev.js              giriş noktası
+   src/core/                wifi, hotspot, scanner, security
+   src/services/            password, qr, geo, backup, audit
+   src/database/            mongo (modeller) + croxy (runtime)
+   src/discord/             bot, komutlar, izinler, cooldown
+   src/server/              loopback dashboard API
+   public/                  dashboard arayüzü
+   config/                  json ayarlar
+   scripts/                 set-credential, register-commands

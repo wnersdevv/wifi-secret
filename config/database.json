@@ -1,0 +1,11 @@
+{
+  "mongo": {
+    "enabled": true,
+    "credentialKey": "mongo_uri",
+    "dbName": "wifi_secret",
+    "serverSelectionTimeoutMS": 8000
+  },
+  "croxydb": {
+    "file": "data/runtime.json"
+  }
+}

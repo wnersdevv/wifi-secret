@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>WiFi Secret</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2330; --border: #263041;
+    --text: #e6edf3; --muted: #8b98a9; --accent: #3b82f6; --ok: #22c55e;
+    --warn: #f59e0b; --danger: #ef4444; --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 -apple-system, Segoe UI, Roboto, sans-serif; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(13,17,23,.9); backdrop-filter: blur(8px); z-index: 5; }
+  header h1 { font-size: 18px; margin: 0; letter-spacing: .3px; }
+  header .brand { color: var(--muted); font-size: 12px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 20px 24px 60px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 12px; }
+  .kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .kv:last-child { border-bottom: 0; }
+  .kv span:first-child { color: var(--muted); }
+  .kv span:last-child { font-variant-numeric: tabular-nums; text-align: right; }
+  .badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+  .badge.ok { background: rgba(34,197,94,.15); color: var(--ok); }
+  .badge.off { background: rgba(239,68,68,.15); color: var(--danger); }
+  button { background: var(--panel2); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 13px; transition: .15s; }
+  button:hover { border-color: var(--accent); }
+  button.primary { background: var(--accent); border-color: var(--accent); }
+  button.danger { background: rgba(239,68,68,.15); border-color: var(--danger); color: #fca5a5; }
+  button:disabled { opacity: .5; cursor: default; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input, select { background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px; width: 100%; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
+  .list { max-height: 260px; overflow: auto; font-size: 12.5px; }
+  .list div { padding: 6px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 8px; }
+  .muted { color: var(--muted); }
+  .finding { padding: 6px 0; font-size: 12.5px; border-bottom: 1px solid var(--border); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+  .sig { color: var(--ok); } .sig.mid { color: var(--warn); } .sig.low { color: var(--danger); }
+  .full { grid-column: 1 / -1; }
+  code { background: var(--bg); padding: 2px 6px; border-radius: 6px; }
+  #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--border); padding: 10px 16px; border-radius: 8px; opacity: 0; transition: .3s; pointer-events: none; }
+  #toast.show { opacity: 1; }
+  .qr img { width: 180px; height: 180px; background: #fff; border-radius: 8px; padding: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>WiFi Secret</h1>
+  <span class="brand">#powerbywnersdev</span>
+</header>
+<div class="wrap">
+  <div class="grid">
+    <div class="card">
+      <h2>Current Network</h2>
+      <div id="current"><div class="muted">Loading…</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Quick Actions</h2>
+      <div class="row">
+        <button onclick="loadScan()">Network Scan</button>
+        <button onclick="loadSecurity()">Security Scan</button>
+        <button onclick="loadBackups()">Backups</button>
+        <button onclick="refreshAll()">Refresh</button>
+      </div>
+      <label>Adapters</label>
+      <div id="adapters" class="list"></div>
+    </div>
+
+    <div class="card">
+      <h2>Hotspot</h2>
+      <div id="hotspot"><div class="muted">Loading…</div></div>
+      <div class="row" style="margin-top:12px">
+        <button class="primary" onclick="hotspot('start')">Start</button>
+        <button onclick="hotspot('stop')">Stop</button>
+        <button onclick="hotspot('restart')">Restart</button>
+      </div>
+      <label>Configure SSID</label>
+      <input id="hsSsid" placeholder="WiFiSecret-AP" />
+      <label>Passphrase (min 8)</label>
+      <div class="row">
+        <input id="hsPass" placeholder="passphrase" />
+        <button onclick="configureHotspot()">Save</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Connected Devices</h2>
+      <div id="devices" class="list"><div class="muted">—</div></div>
+      <button style="margin-top:8px" onclick="loadDevices()">Reload</button>
+    </div>
+
+    <div class="card full">
+      <h2>Nearby Networks</h2>
+      <div id="networks" class="list"><div class="muted">Press “Network Scan”.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Security Scan</h2>
+      <div id="security"><div class="muted">Press “Security Scan”.</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Password Generator</h2>
+      <label>Length</label>
+      <input id="pwLen" type="number" value="16" min="8" max="63" />
+      <div class="row" style="margin-top:8px">
+        <button class="primary" onclick="genPassword()">Generate</button>
+        <button onclick="copyPw()">Copy</button>
+      </div>
+      <div id="pwOut" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>Wi-Fi QR</h2>
+      <label>SSID</label><input id="qrSsid" />
+      <label>Password</label><input id="qrPass" />
+      <label>Security</label>
+      <select id="qrSec"><option>WPA</option><option>WEP</option><option>Open</option></select>
+      <button class="primary" style="margin-top:8px" onclick="makeQr()">Generate</button>
+      <div id="qrOut" class="qr" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>IP → Region</h2>
+      <label>IP address</label><input id="ipAddr" placeholder="8.8.8.8" />
+      <button class="primary" style="margin-top:8px" onclick="lookupIp()">Lookup</button>
+      <div id="ipOut" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card full">
+      <h2>Wi-Fi Profiles & Backups</h2>
+      <div id="backups"><div class="muted">Press “Backups”.</div></div>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
